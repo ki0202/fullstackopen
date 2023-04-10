@@ -3,7 +3,8 @@ import uvicorn
 from datetime import datetime
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, ORJSONResponse, PlainTextResponse
+from fastapi.responses import HTMLResponse, ORJSONResponse, PlainTextResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, root_validator
 
 
@@ -32,6 +33,9 @@ class PersonPost(BaseModel):
 
 app = FastAPI()
 
+app.mount("/static", StaticFiles(directory=f"{os.path.dirname(__file__)}/build/static", html=True), name="static")
+
+
 @app.on_event("startup")
 async def startup_event():
     app.state.persons = [
@@ -54,7 +58,7 @@ app.add_middleware(
 
 @app.get("/", response_class=HTMLResponse)
 async def root():
-    return "<h1>Hello World!</h1>"
+    return FileResponse(f"{os.path.dirname(__file__)}/build/index.html")
 
 
 @app.get("/info", response_class=PlainTextResponse)
